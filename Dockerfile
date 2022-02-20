@@ -77,4 +77,6 @@ WORKDIR $HOME
 COPY --from=full $HOME/.asdf .asdf
 COPY --from=full $HOME/.tool-versions .tool-versions
 
+RUN apt-get update && apt-get install -y libyaml-0-2
+
 CMD /bin/bash -c "source ${ASDF_SCRIPT} && /bin/bash"
