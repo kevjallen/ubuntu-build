@@ -4,6 +4,8 @@ import { ImagePipelineStack } from '../lib/image-pipeline-stack';
 
 const app = new cdk.App();
 
+const initAsdf = '. /root/.asdf/asdf.sh';
+
 new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   gitHubTokenSecretName: 'github-token',
   sourceRepo: 'kevjallen/ubuntu-build',
@@ -11,5 +13,11 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   buildProjectName: 'ubuntu-build',
   ecrRepositoryName: 'ubuntu-build',
   imageStageTargets: ['full', 'slim'],
+  imageTests: [
+    {
+      shell: '/bin/bash',
+      command: `${initAsdf} && gem install rails`,
+    },
+  ],
   webhookTrunkBranch: 'master',
 });
