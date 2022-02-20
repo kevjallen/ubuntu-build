@@ -4,7 +4,7 @@ import { ImagePipelineStack } from '../lib/image-pipeline-stack';
 
 const app = new cdk.App();
 
-const imageCommandPrefix = '/bin/bash -c \'source /root/.asdf/asdf.sh &&\'';
+const imageCommandPrefix = '/bin/bash -c source /root/.asdf/asdf.sh &&';
 
 new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   gitHubTokenSecretName: 'github-token',
