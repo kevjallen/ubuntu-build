@@ -15,8 +15,14 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   imageStageTargets: ['full', 'slim'],
   imageTests: [
     {
-      shell: '/bin/bash',
+      testId: 'rails_install',
       command: `${initAsdf} && gem install rails`,
+      shell: '/bin/bash',
+    },
+    {
+      testId: 'flask_install',
+      command: `${initAsdf} && pip install flask`,
+      shell: '/bin/bash',
     },
   ],
   webhookTrunkBranch: 'master',

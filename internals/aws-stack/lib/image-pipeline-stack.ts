@@ -6,6 +6,7 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import ImageStageTarget from './image-stage-target';
 
 export interface ImageTestProps {
+  testId: string
   command: string
 
   imageStage?: string
@@ -49,13 +50,6 @@ export class ImagePipelineStack extends Stack {
     const buildTags = stageTargets.map((target) => target.getBuildTag());
     const latestTags = stageTargets.map((target) => target.getLatestTag());
 
-    const testCommands = (props.imageTests || []).map(
-      (test) => `docker run ${
-        (stageTargets.find((target) => target.name === test.imageStage)
-          || new ImageStageTarget('latest', publishRepo)
-        ).getBuildTag()} ${test.shell || '/bin/sh'} -c '${test.command}'`,
-    );
-
     const codebuildProject = new codebuild.Project(this, 'Project', {
       projectName: props.buildProjectName,
       buildSpec: codebuild.BuildSpec.fromObject({
@@ -78,7 +72,22 @@ export class ImagePipelineStack extends Stack {
             commands: [
               ...stageTargets
                 .map((target) => target.getBuildCommand([...buildTags, ...latestTags])),
-              ...testCommands,
+              'TEST_PIDFILE_DIR=$(mktemp -d) && TEST_RESULTS_DIR=$(mktemp -d)',
+              // send test commands to the background
+              `${`${(props.imageTests || []).map((test) => `nohup docker run ${
+                (stageTargets.find((target) => target.name === test.imageStage)
+                  || new ImageStageTarget('latest', publishRepo)).getBuildTag()}`
+                + ` ${test.shell || '/bin/sh'} -c '${test.command}'`
+                + ` > $TEST_RESULTS_DIR/${test.testId} 2>&1`
+                + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')}`
+                // wait for test commands to complete
+                + ' && for file in $TEST_PIDFILE_DIR/*; do wait $(cat "$file")'
+                + ' || echo ">>> TEST \'$(basename "$file")\' FAILED <<<";'
+                + ' cat "$TEST_RESULTS_DIR/$(basename "$file")"; done'
+                + ' && for file in $TEST_RESULTS_DIR/*; do echo;'
+                + ' echo ">>> TEST \'$(basename "$file")\' RESULTS <<<";'
+                + ' echo; cat "$file"; done;'}`,
+              // release a new version if all went well
               'npx semantic-release && VERSION=$(git tag --points-at)',
             ],
           },
@@ -103,9 +112,11 @@ export class ImagePipelineStack extends Stack {
         webhookFilters: [
           codebuild.FilterGroup.inEventOf(codebuild.EventAction.PUSH)
             .andBranchIs(props.webhookTrunkBranch || 'master'),
-          codebuild.FilterGroup.inEventOf(codebuild.EventAction.PULL_REQUEST_CREATED),
-          codebuild.FilterGroup.inEventOf(codebuild.EventAction.PULL_REQUEST_REOPENED),
-          codebuild.FilterGroup.inEventOf(codebuild.EventAction.PULL_REQUEST_UPDATED),
+          codebuild.FilterGroup.inEventOf(
+            codebuild.EventAction.PULL_REQUEST_CREATED,
+            codebuild.EventAction.PULL_REQUEST_REOPENED,
+            codebuild.EventAction.PULL_REQUEST_UPDATED,
+          ),
         ],
       }),
     });
