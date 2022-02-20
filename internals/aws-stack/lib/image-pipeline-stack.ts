@@ -73,21 +73,18 @@ export class ImagePipelineStack extends Stack {
               ...stageTargets
                 .map((target) => target.getBuildCommand([...buildTags, ...latestTags])),
               'TEST_PIDFILE_DIR=$(mktemp -d) && TEST_RESULTS_DIR=$(mktemp -d)',
-              // send test commands to the background
               `${`${(props.imageTests || []).map((test) => `nohup docker run ${
                 (stageTargets.find((target) => target.name === test.imageStage)
                   || new ImageStageTarget('latest', publishRepo)).getBuildTag()}`
                 + ` ${test.shell || '/bin/sh'} -c '${test.command}'`
                 + ` > $TEST_RESULTS_DIR/${test.testId} 2>&1`
                 + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')}`
-                // wait for test commands to complete
                 + ' && for file in $TEST_PIDFILE_DIR/*; do wait $(cat "$file")'
                 + ' || { echo; echo ">>> TEST \'$(basename "$file")\' FAILED <<<";'
                 + ' echo; cat "$TEST_RESULTS_DIR/$(basename "$file")"; exit 1; }; done'
                 + ' && for file in $TEST_RESULTS_DIR/*; do echo;'
                 + ' echo ">>> TEST \'$(basename "$file")\' RESULTS <<<";'
                 + ' echo; cat "$file"; done;'}`,
-              // release a new version if all went well
               'npx semantic-release && VERSION=$(git tag --points-at)',
             ],
           },

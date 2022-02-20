@@ -81,6 +81,6 @@ COPY --from=full $HOME/.tool-versions .tool-versions
 
 ENV RUNTIME_DEPS libyaml-0-2
 
-# RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
+RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
 
 CMD /bin/bash -c "source ${ASDF_SCRIPT} && /bin/bash"
