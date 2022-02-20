@@ -96,7 +96,9 @@ export class ImagePipelineStack extends Stack {
               ...stageTargets
                 .map((target) => target.getPublishTagCommands())
                 .reduce((acc, command) => acc.concat(command), [])
-                .map((command) => `if [ ! -z "$VERSION" ]; then ${command}; fi`),
+                .map((command) => 'if [ ! -z "$VERSION" ]'
+                  + ' && [ ! -z "$GITHUB_WEBHOOK_EVENT" ];'
+                  + ` then ${command}; fi`),
             ],
           },
         },
