@@ -14,7 +14,10 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   ecrRepositoryName: 'ubuntu-build',
   imageStageTargets: ['full', 'slim'],
   imageTests: [
-    { command: `${initAsdf} && gem install rails` },
+    {
+      shell: '/bin/bash',
+      command: `${initAsdf} && gem install rails`,
+    },
   ],
   webhookTrunkBranch: 'master',
 });
