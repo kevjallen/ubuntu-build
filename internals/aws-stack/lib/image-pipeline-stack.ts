@@ -50,7 +50,7 @@ export class ImagePipelineStack extends Stack {
     const latestTags = stageTargets.map((target) => target.getLatestTag());
 
     const testCommands = (props.imageTests || []).map(
-      (test) => `docker run '${
+      (test) => `docker run ${
         (stageTargets.find((target) => target.name === test.imageStage)
           || new ImageStageTarget('latest', publishRepo)
         ).getBuildTag()} ${test.shell || '/bin/sh'} -c '${test.command}'`,
