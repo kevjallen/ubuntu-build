@@ -11,5 +11,8 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   buildProjectName: 'ubuntu-build',
   ecrRepositoryName: 'ubuntu-build',
   imageStageTargets: ['full', 'slim'],
+  imageTests: [
+    { command: '/bin/bash -c \'gem install rails\'' },
+  ],
   webhookTrunkBranch: 'master',
 });

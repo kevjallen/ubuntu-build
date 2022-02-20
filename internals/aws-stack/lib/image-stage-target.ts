@@ -3,12 +3,12 @@ export default class ImageStageTarget {
 
   public repoName: string;
 
-  public isDefault?: boolean;
+  private isDefault: boolean;
 
-  constructor(name: string, repoName: string, isDefault: boolean) {
+  constructor(name: string, repoName: string) {
     this.name = name;
     this.repoName = repoName;
-    this.isDefault = isDefault;
+    this.isDefault = (name === 'latest');
   }
 
   getBuildTag() {
