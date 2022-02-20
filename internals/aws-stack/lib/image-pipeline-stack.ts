@@ -7,7 +7,9 @@ import ImageStageTarget from './image-stage-target';
 
 export interface ImageTestProps {
   command: string
+
   imageStage?: string
+  shell?: string
 }
 
 export interface ImagePipelineStackProps extends StackProps {
@@ -48,10 +50,10 @@ export class ImagePipelineStack extends Stack {
     const latestTags = stageTargets.map((target) => target.getLatestTag());
 
     const testCommands = (props.imageTests || []).map(
-      (test) => `docker run ${
+      (test) => `docker run ${test.shell || '/bin/sh'} -c '${
         (stageTargets.find((target) => target.name === test.imageStage)
           || new ImageStageTarget('latest', publishRepo)
-        ).getBuildTag()} ${test.command}`,
+        ).getBuildTag()}' ${test.command}`,
     );
 
     const codebuildProject = new codebuild.Project(this, 'Project', {
