@@ -3,7 +3,9 @@ FROM ubuntu:${UBUNTU_VERSION} as common
 
 ENV HOME /root
 
-RUN apt-get update && apt-get install -y curl git
+ENV COMMON_TOOLS build-essential curl git
+
+RUN apt-get update && apt-get install -y ${COMMON_TOOLS}
 
 ARG ASDF_REPO=https://github.com/asdf-vm/asdf.git
 ARG ASDF_VERSION=v0.9.0
@@ -77,7 +79,7 @@ WORKDIR $HOME
 COPY --from=full $HOME/.asdf .asdf
 COPY --from=full $HOME/.tool-versions .tool-versions
 
-ENV RUNTIME_DEPENDENCIES libyaml-0-2 make
+ENV RUNTIME_DEPENDENCIES libyaml-0-2
 
 RUN apt-get update && apt-get install -y ${RUNTIME_DEPENDENCIES}
 
