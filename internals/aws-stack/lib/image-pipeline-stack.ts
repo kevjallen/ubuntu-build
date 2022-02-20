@@ -82,7 +82,7 @@ export class ImagePipelineStack extends Stack {
                 + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')}`
                 // wait for test commands to complete
                 + ' && for file in $TEST_PIDFILE_DIR/*; do wait $(cat "$file")'
-                + ' || { echo ">>> TEST \'$(basename "$file")\' FAILED <<<";'
+                + ' || { echo; echo ">>> TEST \'$(basename "$file")\' FAILED <<<";'
                 + ' cat "$TEST_RESULTS_DIR/$(basename "$file")"; exit 1; }; done'
                 + ' && for file in $TEST_RESULTS_DIR/*; do echo;'
                 + ' echo ">>> TEST \'$(basename "$file")\' RESULTS <<<";'
