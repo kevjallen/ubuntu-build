@@ -79,8 +79,8 @@ WORKDIR $HOME
 COPY --from=full $HOME/.asdf .asdf
 COPY --from=full $HOME/.tool-versions .tool-versions
 
-ENV RUNTIME_DEPENDENCIES libyaml-0-2
+ENV RUNTIME_DEPS libyaml-0-2
 
-RUN apt-get update && apt-get install -y ${RUNTIME_DEPENDENCIES}
+RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
 
 CMD /bin/bash -c "source ${ASDF_SCRIPT} && /bin/bash"
