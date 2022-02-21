@@ -100,7 +100,7 @@ export class ImagePipelineStack extends Stack {
                 .map((target) => target.getPublishTagCommands())
                 .reduce((acc, command) => acc.concat(command), [])
                 .map((command) => 'if [ ! -z "$VERSION" ]'
-                  + ' && [ ! -z "$GITHUB_WEBHOOK_EVENT" ];'
+                  + ' && [ ! -z "$CODEBUILD_WEBHOOK_TRIGGER" ];'
                   + ` then ${command}; fi`),
             ],
           },
