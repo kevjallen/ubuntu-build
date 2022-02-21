@@ -3,13 +3,13 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
-import ImageStageTarget from './image-stage-target';
+import BuildStageTarget from './build-stage-target';
 
 export interface ImageTestProps {
   testId: string
   command: string
 
-  imageStage?: string
+  stageTarget?: string
   shell?: string
 }
 
@@ -19,7 +19,8 @@ export interface ImagePipelineStackProps extends StackProps {
 
   buildProjectName?: string
   ecrRepositoryName?: string
-  imageStageTargets?: string[]
+  buildStageTargets?: string[]
+  imageBuildArgs?: string[]
   imageTests?: ImageTestProps[]
   webhookTrunkBranch?: string
 }
@@ -43,8 +44,8 @@ export class ImagePipelineStack extends Stack {
 
     const publishRepo = ecrRepository.repositoryUri;
 
-    const stageTargets = (props.imageStageTargets || []).concat('latest').map(
-      (target) => new ImageStageTarget(target, publishRepo),
+    const stageTargets = (props.buildStageTargets || []).concat('default').map(
+      (target) => new BuildStageTarget(target, publishRepo),
     );
 
     const buildTags = stageTargets.map((target) => target.getBuildTag());
@@ -58,6 +59,9 @@ export class ImagePipelineStack extends Stack {
           'secrets-manager': {
             GITHUB_TOKEN: `${githubToken.secretArn}:GITHUB_TOKEN`,
           },
+          variables: {
+            DOCKER_BUILDKIT: 1,
+          },
         },
         phases: {
           pre_build: {
@@ -70,12 +74,14 @@ export class ImagePipelineStack extends Stack {
           },
           build: {
             commands: [
-              ...stageTargets
-                .map((target) => target.getBuildCommand([...buildTags, ...latestTags])),
+              ...stageTargets.map((target) => target.getBuildCommand({
+                buildArgs: props.imageBuildArgs,
+                cacheFrom: [...buildTags, ...latestTags],
+              })),
               'TEST_PIDFILE_DIR=$(mktemp -d) && TEST_RESULTS_DIR=$(mktemp -d)',
               `${`${(props.imageTests || []).map((test) => `nohup docker run ${
-                (stageTargets.find((target) => target.name === test.imageStage)
-                  || new ImageStageTarget('latest', publishRepo)).getBuildTag()}`
+                (stageTargets.find((target) => target.name === test.stageTarget)
+                  || new BuildStageTarget('default', publishRepo)).getBuildTag()}`
                 + ` ${test.shell || '/bin/sh'} -c '${test.command}'`
                 + ` > $TEST_RESULTS_DIR/${test.testId} 2>&1`
                 + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')}`
@@ -119,6 +125,7 @@ export class ImagePipelineStack extends Stack {
         ],
       }),
     });
+    
     ecrRepository.grantPullPush(codebuildProject);
     githubToken.grantRead(codebuildProject);
   }
