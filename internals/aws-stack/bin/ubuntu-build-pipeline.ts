@@ -13,7 +13,7 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   buildProjectName: 'ubuntu-build',
   ecrRepositoryName: 'ubuntu-build',
   buildStageTargets: ['full', 'slim'],
-  imageBuildArgs:['BUILDKIT_INLINE_CACHE=1'],
+  imageBuildArgs: ['BUILDKIT_INLINE_CACHE=1'],
   imageTests: [
     {
       testId: 'rails_install',

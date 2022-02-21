@@ -125,7 +125,7 @@ export class ImagePipelineStack extends Stack {
         ],
       }),
     });
-    
+
     ecrRepository.grantPullPush(codebuildProject);
     githubToken.grantRead(codebuildProject);
   }
