@@ -1,4 +1,9 @@
-export default class ImageStageTarget {
+export interface BuildCommandOptions {
+  buildArgs?: string[]
+  cacheFrom?: string[]
+}
+
+export default class BuildStageTarget {
   public name: string;
 
   public repoName: string;
@@ -8,7 +13,7 @@ export default class ImageStageTarget {
   constructor(name: string, repoName: string) {
     this.name = name;
     this.repoName = repoName;
-    this.isDefault = (name === 'latest');
+    this.isDefault = (name === 'default');
   }
 
   getBuildTag() {
@@ -25,14 +30,22 @@ export default class ImageStageTarget {
     return this.isDefault ? publishTag : `${publishTag}-${this.name}`;
   }
 
-  getBuildCommand(cacheFrom?: string[]) {
-    let cacheFromArgs = '';
+  getBuildCommand(options?: BuildCommandOptions) {
+    let commandArgs: string[] = [];
 
-    if (cacheFrom) {
-      cacheFromArgs = `--cache-from ${cacheFrom.join(' --cache-from ')}`;
+    if (options?.buildArgs) {
+      commandArgs = commandArgs.concat(
+        options.buildArgs.map((arg) => `--build-arg ${arg}`),
+      );
     }
 
-    return `docker build -t ${this.getBuildTag()} ${cacheFromArgs}`
+    if (options?.cacheFrom) {
+      commandArgs = commandArgs.concat(
+        options.cacheFrom.map((image) => `--cache-from ${image}`),
+      );
+    }
+
+    return `docker build -t ${this.getBuildTag()} ${commandArgs.join(' ')}`
       + ` ${this.isDefault ? '.' : `--target ${this.name} .`}`;
   }
 
