@@ -31,14 +31,18 @@ export default class BuildStageTarget {
   }
 
   getBuildCommand(options?: BuildCommandOptions) {
-    const commandArgs: string[] = [];
+    let commandArgs: string[] = [];
 
     if (options?.buildArgs) {
-      commandArgs.concat(options.buildArgs.map((arg) => `--build-arg ${arg}`));
+      commandArgs = commandArgs.concat(
+        options.buildArgs.map((arg) => `--build-arg ${arg}`),
+      );
     }
 
     if (options?.cacheFrom) {
-      commandArgs.concat(options.cacheFrom.map((image) => `--cache-from ${image}`));
+      commandArgs = commandArgs.concat(
+        options.cacheFrom.map((image) => `--cache-from ${image}`),
+      );
     }
 
     return `docker build -t ${this.getBuildTag()} ${commandArgs.join(' ')}`
