@@ -74,23 +74,32 @@ export class ImagePipelineStack extends Stack {
           },
           build: {
             commands: [
+              // build image(s)
               ...stageTargets.map((target) => target.getBuildCommand({
                 buildArgs: props.imageBuildArgs,
                 cacheFrom: [...buildTags, ...latestTags],
               })),
+
+              // create folders for test results and process ids
               'TEST_PIDFILE_DIR=$(mktemp -d) && TEST_RESULTS_DIR=$(mktemp -d)',
+
+              // start test commands, sending them all to the background
               `${`${(props.imageTests || []).map((test) => `nohup docker run ${
                 (stageTargets.find((target) => target.name === test.stageTarget)
                   || new BuildStageTarget('default', publishRepo)).getBuildTag()}`
                 + ` ${test.shell || '/bin/sh'} -c '${test.command}'`
                 + ` > $TEST_RESULTS_DIR/${test.testId} 2>&1`
-                + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')}`
-                + ' && for file in $TEST_PIDFILE_DIR/*; do wait $(cat "$file")'
+                + ` & echo $! > $TEST_PIDFILE_DIR/${test.testId}`).join('; ')};`
+
+                // bring test commands into the foreground one at a time
+                + ' for file in $TEST_PIDFILE_DIR/*; do wait $(cat "$file")'
                 + ' || { echo; echo ">>> TEST \'$(basename "$file")\' FAILED <<<";'
                 + ' echo; cat "$TEST_RESULTS_DIR/$(basename "$file")"; exit 1; }; done'
                 + ' && for file in $TEST_RESULTS_DIR/*; do echo;'
                 + ' echo ">>> TEST \'$(basename "$file")\' RESULTS <<<";'
                 + ' echo; cat "$file"; done;'}`,
+
+              // run the release if all went well
               'npx semantic-release && VERSION=$(git tag --points-at)',
             ],
           },
@@ -125,7 +134,6 @@ export class ImagePipelineStack extends Stack {
         ],
       }),
     });
-
     ecrRepository.grantPullPush(codebuildProject);
     githubToken.grantRead(codebuildProject);
   }
