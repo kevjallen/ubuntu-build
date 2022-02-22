@@ -34,7 +34,7 @@ To install a specific version of Node.js (also accepts the keyword `latest`):
 
 The version manager builds Python and Ruby from source when installing them.
 - The `full` image comes with all build dependencies for these tools
-- If you want to avoid this, use an [included version](./.tool-versions)
+- Use an [included version](./.tool-versions) if you want to avoid this
 
 
 ## Contributions
