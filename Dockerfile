@@ -42,8 +42,8 @@ ENV TZ=America/New_York
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y ${PYTHON_BUILD_DEPS}
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf plugin add python"
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf install python"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add python"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf install python"
 
 ENV RUBY_BUILD_DEPS \
   autoconf \
@@ -61,16 +61,16 @@ ENV RUBY_BUILD_DEPS \
   libdb-dev
 
 RUN apt-get update && apt-get install -y ${RUBY_BUILD_DEPS}
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf plugin add ruby"
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf install ruby"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add ruby"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf install ruby"
 
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf plugin add golang"
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf install golang"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add golang"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf install golang"
 
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf plugin add nodejs"
-RUN /bin/bash -c "source ${ASDF_SCRIPT} && asdf install nodejs"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add nodejs"
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf install nodejs"
 
-CMD /bin/bash -c "source ${ASDF_SCRIPT} && /bin/bash"
+CMD /bin/bash -c ". ${ASDF_SCRIPT} && /bin/bash"
 
 
 FROM common as slim
@@ -83,4 +83,4 @@ ENV RUNTIME_DEPS libyaml-0-2
 
 RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
 
-CMD /bin/bash -c "source ${ASDF_SCRIPT} && /bin/bash"
+CMD /bin/bash -c ". ${ASDF_SCRIPT} && /bin/bash"
