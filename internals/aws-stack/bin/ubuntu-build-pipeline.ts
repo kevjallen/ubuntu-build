@@ -10,7 +10,7 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   gitHubTokenSecretName: 'github-token',
   sourceRepo: 'kevjallen/ubuntu-build',
 
-  buildProjectName: 'ubuntu-build',
+  buildProjectName: 'ubuntu-build-main',
   ecrRepositoryName: 'ubuntu-build',
   buildStageTargets: ['full', 'slim'],
   imageBuildArgs: ['BUILDKIT_INLINE_CACHE=1'],
@@ -26,5 +26,6 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
       shell: '/bin/bash',
     },
   ],
+  securityProjectName: 'ubuntu-build-security',
   webhookTrunkBranch: 'master',
 });
