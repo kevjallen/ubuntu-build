@@ -40,6 +40,7 @@ export default class ImageBuildProject extends Construct {
 
     const buildTags = stageTargets.map((target) => target.getBuildTag());
     const latestTags = stageTargets.map((target) => target.getLatestTag());
+    const versionTags = stageTargets.map((target) => target.getPublishTag());
 
     this.buildProject = new codebuild.Project(this, 'Project', {
       projectName: props.buildProjectName,
@@ -56,10 +57,16 @@ export default class ImageBuildProject extends Construct {
         phases: {
           pre_build: {
             commands: [
+              'VERSION=$(git tag --points-at)',
               'aws ecr get-login-password --region $AWS_DEFAULT_REGION'
                 + ` | docker login -u AWS --password-stdin ${publishRepo}`,
               ...(props.cachingEnabled === false ? [] : stageTargets.map(
-                (target) => `${target.getPullLatestTagCommand()} || true`,
+                (target) => 'if [ -z "$VERSION" ]; then'
+                  + ` ${target.getPullLatestTagCommand()} || true; fi`,
+              )),
+              ...(props.cachingEnabled === false ? [] : stageTargets.map(
+                (target) => 'if [ ! -z "$VERSION" ]; then'
+                  + ` ${target.getPullVersionTagCommand()} || true; fi`,
               )),
             ],
           },
@@ -69,7 +76,7 @@ export default class ImageBuildProject extends Construct {
               ...stageTargets.map((target) => target.getBuildCommand({
                 buildArgs: props.imageBuildArgs,
                 cacheFrom: props.cachingEnabled === false
-                  ? [] : [...buildTags, ...latestTags],
+                  ? [] : [...buildTags, ...latestTags, ...versionTags],
               })),
 
               // create folders for test results and process ids
@@ -91,17 +98,20 @@ export default class ImageBuildProject extends Construct {
                 + ' echo ">>> TEST \'$(basename "$file")\' RESULTS <<<";'
                 + ' echo; cat "$file"; done;'}`,
 
-              // run the release if all went well
+              // release if all went well
               'npx semantic-release && VERSION=$(git tag --points-at)',
             ],
           },
           post_build: {
             commands: [
               ...stageTargets
-                .map((target) => target.getPublishTagCommands())
-                .reduce((acc, command) => acc.concat(command), [])
+                .map((target) => target.getPublishVersionTagCommand())
+                .map((command) => `if [ ! -z "$VERSION" ]; then ${command}; fi`),
+              ...stageTargets
+                .map((target) => target.getPublishLatestTagCommand())
                 .map((command) => 'if [ ! -z "$VERSION" ]'
-                  + ' && [ ! -z "$CODEBUILD_WEBHOOK_TRIGGER" ];'
+                  + ' && ([ ! -z "$CODEBUILD_WEBHOOK_TRIGGER" ]'
+                  + ' || [ ! -z "$FORCE_TAG_LATEST" ]);'
                   + ` then ${command}; fi`),
             ],
           },

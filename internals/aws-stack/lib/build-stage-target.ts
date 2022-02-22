@@ -38,7 +38,6 @@ export default class BuildStageTarget {
         options.buildArgs.map((arg) => `--build-arg ${arg}`),
       );
     }
-
     if (options?.cacheFrom) {
       commandArgs = commandArgs.concat(
         options.cacheFrom.map((image) => `--cache-from ${image}`),
@@ -49,21 +48,21 @@ export default class BuildStageTarget {
       + ` ${this.isDefault ? '.' : `--target ${this.name} .`}`;
   }
 
+  getPullVersionTagCommand() {
+    return `docker pull ${this.getPublishTag()}`;
+  }
+
   getPullLatestTagCommand() {
     return `docker pull ${this.getLatestTag()}`;
   }
 
-  private getPublishVersionTagCommand() {
+  getPublishVersionTagCommand() {
     return `docker image tag ${this.getBuildTag()} ${this.getPublishTag()}`
       + ` && docker image push ${this.getPublishTag()}`;
   }
 
-  private getPublishLatestTagCommand() {
+  getPublishLatestTagCommand() {
     return `docker image tag ${this.getBuildTag()} ${this.getLatestTag()}`
       + ` && docker image push ${this.getLatestTag()}`;
-  }
-
-  getPublishTagCommands() {
-    return [this.getPublishVersionTagCommand(), this.getPublishLatestTagCommand()];
   }
 }
