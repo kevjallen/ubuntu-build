@@ -15,8 +15,7 @@ Redeploy without caching occasionally for security updates.
 
 The version manager script is located at `/root/.asdf/asdf.sh`.
 
-The script is not POSIX-compliant and will not work with all shells.
-Bash is recommended.
+The script is not POSIX-compliant and will not work with all shells. Bash is recommended.
 
 It must be executed in the shell context explicitly when starting a container.
 - `docker run ubuntu-build /bin/bash -c '. /root/asdf/asdf.sh && ./some-script.sh'`
@@ -33,8 +32,7 @@ To install a specific version of Node.js (also accepts the keyword `latest`):
 - `asdf install nodejs 16.14.0`
 
 The version manager builds Python and Ruby from source when installing them.
-- The `full` image comes with all build dependencies for these tools
-- Use an [included version](./.tool-versions) if you want to avoid this
+- Use an [included version](./tool-versions) if you want to avoid this
 
 
 ## Contributions
