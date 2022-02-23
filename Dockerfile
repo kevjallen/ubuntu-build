@@ -99,8 +99,10 @@ COPY --from=python $HOME/.asdf/plugins/python .asdf/plugins/python
 COPY --from=ruby $HOME/.asdf/installs/ruby .asdf/installs/ruby
 COPY --from=ruby $HOME/.asdf/plugins/ruby .asdf/plugins/ruby
 
+RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf reshim"
+
 RUN TOOL_VERSIONS_STAGING=$(mktemp -d)
 COPY tool-versions "$TOOL_VERSIONS_STAGING"
 
 RUN touch .tool-versions \
-  && for file in tool-versions; do cat "$file" >> .tool-versions; done
+  && for file in "$TOOL_VERSIONS_STAGING"; do cat "$file" >> .tool-versions; done
