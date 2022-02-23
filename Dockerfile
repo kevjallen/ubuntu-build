@@ -16,13 +16,13 @@ WORKDIR $HOME
 CMD /bin/bash -c ". ${ASDF_SCRIPT} && /bin/bash"
 
 
-FROM base as golang
+FROM base AS golang
 
 COPY tool-versions/golang .tool-versions
 RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add golang && asdf install golang"
 
 
-FROM base as nodejs
+FROM base AS nodejs
 
 COPY tool-versions/nodejs .tool-versions
 RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add nodejs && asdf install nodejs"
