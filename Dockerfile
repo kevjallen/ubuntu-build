@@ -104,5 +104,5 @@ RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf reshim"
 COPY tool-versions tool-versions
 
 RUN touch .tool-versions \
-  && for file in tool-versions; do cat "$file" >> .tool-versions; done \
+  && for file in tool-versions/*; do cat "$file" >> .tool-versions; done \
   && rm -r tool-versions

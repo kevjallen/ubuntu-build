@@ -44,6 +44,8 @@ export default class ImageBuildProject extends Construct {
 
     this.buildProject = new codebuild.Project(this, 'Project', {
       projectName: props.buildProjectName,
+      cache: props.cachingEnabled === false ? undefined
+        : codebuild.Cache.local(codebuild.LocalCacheMode.DOCKER_LAYER),
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
         env: {
