@@ -81,7 +81,7 @@ COPY tool-versions/ruby .tool-versions
 RUN /bin/bash -c ". ${ASDF_SCRIPT} && asdf plugin add ruby && asdf install ruby"
 
 
-FROM common as full
+FROM base AS full
 
 ENV RUNTIME_DEPS libyaml-0-2
 

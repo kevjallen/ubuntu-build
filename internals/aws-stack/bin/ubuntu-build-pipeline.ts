@@ -12,11 +12,11 @@ new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   buildProjectName: 'ubuntu-build-main',
   ecrRepositoryName: 'ubuntu-build',
   buildStageTargets: [
-    'full', 
-    'golang', 
-    'nodejs', 
-    'python', 
-    'ruby'
+    'full',
+    'golang',
+    'nodejs',
+    'python',
+    'ruby',
   ],
   imageBuildArgs: ['BUILDKIT_INLINE_CACHE=1'],
   imageTests: [
