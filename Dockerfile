@@ -16,6 +16,13 @@ WORKDIR $HOME
 CMD /bin/bash -c ". ${ASDF_SCRIPT} && /bin/bash"
 
 
+FROM base as awscli
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+RUN unzip awscliv2.zip
+RUN ./aws/install
+
+
 FROM base AS golang
 
 COPY tool-versions/golang .tool-versions
@@ -86,6 +93,9 @@ FROM base AS final
 ENV RUNTIME_DEPS libyaml-0-2
 
 RUN apt-get update && apt-get install -y ${RUNTIME_DEPS}
+
+COPY --from=awscli /usr/local/aws-cli /usr/local/aws-cli
+COPY --from=awscli /usr/local/bin/aws /usr/local/bin/aws
 
 COPY --from=golang $HOME/.asdf/installs/golang .asdf/installs/golang
 COPY --from=golang $HOME/.asdf/plugins/golang .asdf/plugins/golang
