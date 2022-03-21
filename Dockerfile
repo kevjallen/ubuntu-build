@@ -2,7 +2,7 @@ ARG UBUNTU_VERSION=20.04
 FROM ubuntu:${UBUNTU_VERSION} as base
 ENV HOME /root
 
-ENV COMMON_TOOLS build-essential curl git
+ENV COMMON_TOOLS build-essential curl git unzip
 
 RUN apt-get update && apt-get install -y ${COMMON_TOOLS}
 
