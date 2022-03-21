@@ -50,7 +50,7 @@ export default class ImageBuildProject extends Construct {
         version: '0.2',
         env: {
           'secrets-manager': {
-            GITHUB_TOKEN: `${props.gitHubToken.secretArn}:GITHUB_TOKEN`,
+            GITHUB_TOKEN: props.gitHubToken.secretArn,
           },
           variables: {
             DOCKER_BUILDKIT: 1,

@@ -9,7 +9,7 @@ const initAsdf = '. /root/.asdf/asdf.sh';
 new ImagePipelineStack(app, 'UbuntuBuildPipeline', {
   gitHubTokenSecretName: 'github-token',
   sourceRepo: 'kevjallen/ubuntu-build',
-  
+
   buildProjectName: 'ubuntu-build-main',
   ecrRepositoryName: 'ubuntu-build',
   buildStageTargets: [
